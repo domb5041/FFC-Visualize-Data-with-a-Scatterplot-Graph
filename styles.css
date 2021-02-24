@@ -1,11 +1,7 @@
-#chart{
+#chart {
     text-align: center;
 }
 
-#svg-area{
+#svg-area {
     border: 1px solid black;
-}
-
-.dot {
-    fill: coral;
 }

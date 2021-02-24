@@ -17,6 +17,8 @@ const drawGraph = dataset => {
     const yearObject = d => new Date(d.Year, 0, 1);
     const timeObject = d => new Date(1970, 0, 1, 0, 0, d.Seconds);
 
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
+
     const svg = d3
         .select('#chart')
         .append('svg')
@@ -56,7 +58,8 @@ const drawGraph = dataset => {
         .attr('r', 5)
         .attr('class', 'dot')
         .attr('data-xvalue', d => yearObject(d))
-        .attr('data-yvalue', d => timeObject(d));
+        .attr('data-yvalue', d => timeObject(d))
+        .style('fill', d => color(d.Doping.length > 0));
     // .on('mouseover', d => {
     //     svg.append('text')
     //         .text(d[0] + ' - ' + d[1])
@@ -68,4 +71,18 @@ const drawGraph = dataset => {
     // .on('mouseout', () => {
     //     d3.selectAll('#tooltip').remove()
     // });
+
+    svg.append('g')
+        .attr('id', 'legend')
+        .selectAll('#legend')
+        .data(color.domain())
+        .enter()
+        .append('text')
+        .attr('x', w - 20)
+        .attr('y', (d, i) => i * 25 + 25)
+        .style('text-anchor', 'end')
+        .style('fill', color)
+        .text(d =>
+            d ? 'Riders with doping allegations' : 'No doping allegations'
+        );
 };
