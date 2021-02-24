@@ -59,18 +59,18 @@ const drawGraph = dataset => {
         .attr('class', 'dot')
         .attr('data-xvalue', d => yearObject(d))
         .attr('data-yvalue', d => timeObject(d))
-        .style('fill', d => color(d.Doping.length > 0));
-    // .on('mouseover', d => {
-    //     svg.append('text')
-    //         .text(d[0] + ' - ' + d[1])
-    //         .attr('id', 'tooltip')
-    //         .attr('x', xScale(convertToDate(d[0])) + 5)
-    //         .attr('y', h - p - 25)
-    //         .attr('data-date', d[0]);
-    // })
-    // .on('mouseout', () => {
-    //     d3.selectAll('#tooltip').remove()
-    // });
+        .style('fill', d => color(d.Doping.length > 0))
+        .on('mouseover', d => {
+            svg.append('text')
+                .text(d.Name)
+                .attr('id', 'tooltip')
+                .attr('x', xScale(yearObject(d)) + 10)
+                .attr('y', yScale(timeObject(d)) + 5)
+                .attr('data-year', yearObject(d));
+        })
+        .on('mouseout', () => {
+            d3.selectAll('#tooltip').remove();
+        });
 
     svg.append('g')
         .attr('id', 'legend')
