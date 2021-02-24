@@ -1,22 +1,21 @@
 const getDataset = () => {
     fetch(
-        'https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/GDP-data.json'
+        'https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/cyclist-data.json'
     )
         .then(response => response.json())
-        .then(data => drawGraph(data.data));
+        .then(data => drawGraph(data));
 };
 
 getDataset();
 
-const convertToDate = (str) => {
-  const date = str.split('-')
-  return new Date(date[0], date[1], date[2])
-}
-
 const drawGraph = dataset => {
+    console.log(dataset);
     const w = 700;
     const h = 500;
     const p = 50;
+
+    const yearObject = d => new Date(d.Year, 0, 1);
+    const timeObject = d => new Date(1970, 0, 1, 0, 0, d.Seconds);
 
     const svg = d3
         .select('#chart')
@@ -27,18 +26,15 @@ const drawGraph = dataset => {
 
     const xScale = d3
         .scaleTime()
-        .domain([
-          convertToDate(dataset[0][0]),
-          convertToDate(dataset[dataset.length - 1][0])
-        ])
-        .range([p, w - p])
+        .domain(d3.extent(dataset, d => yearObject(d)))
+        .range([p, w - p]);
 
     const yScale = d3
-        .scaleLinear()
-        .domain([0, d3.max(dataset, d => d[1])])
-        .range([h - p, p]);
+        .scaleTime()
+        .domain(d3.extent(dataset, d => timeObject(d)))
+        .range([p, h - p]);
 
-    const yAxis = d3.axisLeft(yScale);
+    const yAxis = d3.axisLeft(yScale).tickFormat(d3.timeFormat('%M:%S'));
     const xAxis = d3.axisBottom(xScale);
 
     svg.append('g')
@@ -51,26 +47,25 @@ const drawGraph = dataset => {
         .attr('id', 'x-axis')
         .call(xAxis);
 
-    svg.selectAll('rect')
+    svg.selectAll('circle')
         .data(dataset)
         .enter()
-        .append('rect')
-        .attr('x', d => xScale(convertToDate(d[0])))
-        .attr('y', d => yScale(d[1]))
-        .attr('width', (w - p - p) / dataset.length)
-        .attr('height', d => h - p - yScale(d[1]))
-        .attr('class', 'bar')
-        .attr('data-date', d => d[0])
-        .attr('data-gdp', d => d[1])
-        .on('mouseover', d => {
-            svg.append('text')
-                .text(d[0] + ' - ' + d[1])
-                .attr('id', 'tooltip')
-                .attr('x', xScale(convertToDate(d[0])) + 5)
-                .attr('y', h - p - 25)
-                .attr('data-date', d[0]);
-        })
-        .on('mouseout', () => {
-            d3.selectAll('#tooltip').remove()
-        });
+        .append('circle')
+        .attr('cx', d => xScale(yearObject(d)))
+        .attr('cy', d => yScale(timeObject(d)))
+        .attr('r', 5)
+        .attr('class', 'dot')
+        .attr('data-xvalue', d => yearObject(d))
+        .attr('data-yvalue', d => timeObject(d));
+    // .on('mouseover', d => {
+    //     svg.append('text')
+    //         .text(d[0] + ' - ' + d[1])
+    //         .attr('id', 'tooltip')
+    //         .attr('x', xScale(convertToDate(d[0])) + 5)
+    //         .attr('y', h - p - 25)
+    //         .attr('data-date', d[0]);
+    // })
+    // .on('mouseout', () => {
+    //     d3.selectAll('#tooltip').remove()
+    // });
 };
